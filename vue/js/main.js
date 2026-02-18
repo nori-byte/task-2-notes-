@@ -1,97 +1,142 @@
-Vue.component('first-column', {
-    props: {
-        cards: Array,
-        max: Number
-    },
-    template: `
-    <div>
-        <h2>First Column</h2>
-        <p v-if="!cards.length">There are no cards yet.</p>
-        <ul>
-            <li v-for="card in cards">
-                <p>{{ card.name }}</p>
-            </li>
-        </ul>
-        <card @card-submitted="addCard"></card>
-    </div>
-    `,
-    methods: {
-        addCard(cardItem) {
-            this.cards.push(cardItem);
-        }
-    },
-});
 
-Vue.component('second-column', {
+// Компонент формы для добавления новой карточки
+Vue.component('add-card-form', {
     template: `
-    <div>
-        <h2>Second Column</h2>
-    </div>
-    `
-})
-Vue.component('third-column', {
-    template: `
-    <div>
-        <h2>Third Column</h2>
-    </div>
-    `
-})
-Vue.component('card', {
-    template: `
-<div>
     <form class="review-form" @submit.prevent="onSubmit">
-        <p v-if="errors.length">
-            <b>Please correct the following error(s):</b>
-            <ul>
-                <li v-for="error in errors">{{ error }}</li>
-            </ul>
-        </p>
-         <p>
-           <label for="name">Name:</label>
-           <input id="name" v-model="name" placeholder="Name">
-         </p>
-         <p>
-           <input type="submit" value="Submit"> 
-         </p>
+      <p v-if="errors.length">
+        <b>Please correct the following error(s):</b>
+        <ul>
+          <li v-for="error in errors">{{ error }}</li>
+        </ul>
+      </p>
+      <p>
+        <label for="name">Card name:</label>
+        <input id="name" v-model="name" placeholder="Enter card name">
+      </p>
+      <p>
+        <input type="submit" value="Add card">
+      </p>
     </form>
-    </div>
-    `,
+  `,
     data() {
         return {
             name: null,
             errors: []
         }
     },
-    methods:{
+    methods: {
         onSubmit() {
-            if(this.name) {
-                let cardItem = {
-                    name: this.name,
-                }
-                this.$emit('card-submitted', cardItem)
-                this.name = null
+            this.errors = [];
+            if (this.name && this.name.trim()) {
+                this.$emit('add-card', this.name.trim());
+                this.name = null;
             } else {
-                if(!this.name) this.errors.push("Name required.")
+                this.errors.push("Name is required.");
             }
         }
     }
+});
+// Компонент одной карточки с возможностью добавлять элементы списка
+Vue.component('card-item', {
+    props: {
+        card: { type: Object, required: true }
+    },
+    template: `
+        <div class="card">
+          <h3>{{ card.name }}</h3>
+          <ul>
+            <li v-for="(item, idx) in card.items" :key="idx">{{ item }}</li>
+          </ul>
+          <div>
+            <input v-model="newItem" @keyup.enter="addItem" placeholder="New item">
+            <button @click="addItem">Add</button>
+          </div>
+        </div>
+      `,
+    data() {
+        return {
+            newItem: ''
+        };
+    },
+    methods: {
+        addItem() {
+            if (this.newItem.trim()) {
+                this.card.items.push(this.newItem.trim());
+                this.newItem = '';
+            }
+        }
+    }
+});
 
-})
-let app = new Vue({
+// Столбцы
+Vue.component('first-column', {
+    props: {
+        cards: Array,
+        max: Number,
+        columnName: String
+    },
+    template: `
+        <div class="column">
+          <h2>{{ columnName }} Column (max {{ max }})</h2>
+          <p v-if="!cards.length">There are no cards yet.</p>
+          <card-item v-for="card in cards" :key="card.id" :card="card"></card-item>
+        </div>
+      `
+});
+
+Vue.component('second-column', {
+    props: {
+        cards: Array,
+        max: Number
+    },
+    template: `
+        <div class="column">
+          <h2>Second Column (max {{ max }})</h2>
+          <p v-if="!cards.length">There are no cards yet.</p>
+          <card-item v-for="card in cards" :key="card.id" :card="card"></card-item>
+        </div>
+      `
+});
+
+Vue.component('third-column', {
+    props: {
+        cards: Array
+    },
+    template: `
+        <div class="column">
+          <h2>Third Column (unlimited)</h2>
+          <p v-if="!cards.length">There are no cards yet.</p>
+          <card-item v-for="card in cards" :key="card.id" :card="card"></card-item>
+        </div>
+      `
+});
+
+// Корневой экземпляр
+new Vue({
     el: '#app',
     data: {
-        firstMax:3,
-        secondMax:5,
+        firstMax: 3,
+        secondMax: 5,
         firstColumnCards: [],
         secondColumnCards: [],
         thirdColumnCards: [],
+        nextCardId: 1
     },
-    computed: {
-        firstColumnBlocked() {
+    methods: {
+        addCard(cardName) {
+            const newCard = {
+                id: this.nextCardId++,
+                name: cardName,
+                items: []
+            };
 
-        },
+            if (this.firstColumnCards.length < this.firstMax) {
+                this.firstColumnCards.push(newCard);
+            } else if (this.secondColumnCards.length < this.secondMax) {
+                this.secondColumnCards.push(newCard);
+            } else {
+                this.thirdColumnCards.push(newCard);
+            }
+        }
     }
-})
-
-
-
+});
