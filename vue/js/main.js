@@ -39,44 +39,53 @@ Vue.component('add-card-form', {
 // Компонент одной карточки с возможностью добавлять элементы списка
 Vue.component('card-item', {
     props: {
-        card: {type: Object, required: true}
+        card: { type: Object, required: true }
     },
-    template: `
-        <div class="card">
-          <h3>{{ card.name }}</h3>
-          <ul>
-            <li v-for="(item, idx) in card.items" :key="idx">{{ item }}</li>
-          </ul>
-          <div>
-            <input v-model="newItem" @keyup.enter="addItem" placeholder="New item">
-            <button @click="addItem">Add</button>
-             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-          </div>
-       
-        </div>
-      `,
     data() {
         return {
             newItem: '',
             errorMessage: ''
-
-
         };
     },
     methods: {
         addItem() {
-            if (this.newItem.trim()) {
-                if (this.card.items.length >= 5) {
-                    this.errorMessage = 'maximum five points per card';
-                    return;
-                }
-                this.card.items.push(this.newItem.trim());
-                this.newItem = '';
-            } else {
-                if (!this.newItem) this.errors.push("maximum five points per card.")
+            const text = this.newItem.trim();
+            if (!text) {
+                this.errorMessage = 'Item cannot be empty.';
+                return;
             }
+            if (this.card.items.length >= 5) {
+                this.errorMessage = 'Maximum five points per card';
+                return;
+            }
+            this.card.items.push({ text, completed: false });
+            this.newItem = '';
+            this.errorMessage = '';
         }
     },
+    template: `
+        <div class="card">
+            <h3>{{ card.name }}</h3>
+            <ul>
+                <li v-for="(item, idx) in card.items" :key="idx">
+                    <input type="checkbox" v-model="item.completed">
+                    <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
+                        {{ item.text }}
+                    </span>
+                </li>
+            </ul>
+            <div>
+                <input 
+                    type="text" 
+                    v-model="newItem" 
+                    @keyup.enter="addItem" 
+                    placeholder="New item"
+                >
+                <button @click="addItem">Add</button>
+                <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+            </div>
+        </div>
+    `
 });
 
 // Столбцы
@@ -138,7 +147,7 @@ new Vue({
             const newCard = {
                 id: this.nextCardId++,
                 name: cardName,
-                items: []
+                items: [],
             };
 
             if (this.firstColumnCards.length < this.firstMax) {
