@@ -9,18 +9,14 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="css/main.css">
     <script defer src="js/vue.min.js"></script>
     <script defer src="js/main.js"></script>
-    <title>Notes App</title>
+    <title>Лучшие заметки</title>
 </head>
 <body>
 <div id="app">
-    <first-column
-            :cards="firstColumnCards"
-            max="fstMax"></first-column>
-    <second-column
-            :cards="secondColumnCards"
-            max="scndMax"></second-column>
-    <third-column
-            :cards="thirdColumnCards"></third-column>
+    <first-column :cards="firstColumnCards" :max="firstMax"></first-column>
+    <second-column :cards="secondColumnCards" :max="secondMax"></second-column>
+    <third-column :cards="thirdColumnCards"></third-column>
 </div>
+
 </body>
 </html>
