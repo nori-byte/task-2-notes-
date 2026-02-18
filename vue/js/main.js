@@ -87,7 +87,7 @@ Vue.component('card-item', {
                     </span>
                 </li>
             </ul>
-            <div>
+            <div class="item-new">
                 <input 
                     type="text" 
                     v-model="newItem" 
@@ -112,9 +112,11 @@ Vue.component('first-column', {
     },
     template: `
         <div class="column">
-          <h2>{{ columnName }} Column (max {{ max }})</h2>
+          <h2>First column</h2>
+          <div class="column-item">
           <p v-if="!cards.length">There are no cards yet.</p>
           <card-item v-for="card in cards" :key="card.id" :card="card"  @toggle-item="$emit('toggle-item', $event)"></card-item>
+        </div>
         </div>
       `
 });
@@ -126,9 +128,11 @@ Vue.component('second-column', {
     },
     template: `
         <div class="column">
-          <h2>Second Column (max {{ max }})</h2>
+          <h2>Second column</h2>
+          <div class="column-item">
           <p v-if="!cards.length">There are no cards yet.</p>
           <card-item v-for="card in cards" :key="card.id" :card="card"  @toggle-item="$emit('toggle-item', $event)"></card-item>
+        </div>
         </div>
       `
 });
@@ -139,9 +143,11 @@ Vue.component('third-column', {
     },
     template: `
         <div class="column">
-          <h2>Third Column (unlimited)</h2>
+          <h2>Third Column</h2>
+          <div class="column-item">
           <p v-if="!cards.length">There are no cards yet.</p>
           <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+        </div>
         </div>
       `
 });
@@ -186,12 +192,6 @@ new Vue({
             return (completedCount / card.items.length) * 100;
         },
 
-        moveCard(card, fromArray, toArray) {
-            const index = fromArray.indexOf(card);
-            if (index !== -1) {
-                fromArray.splice(index, 1);
-                toArray.push(card);
-            }
-        },
+
     }
 });
