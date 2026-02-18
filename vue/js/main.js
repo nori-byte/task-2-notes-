@@ -21,7 +21,9 @@ Vue.component('add-card-form', {
     data() {
         return {
             name: null,
-            errors: []
+            errors: [],
+            newItem: [],
+
         }
     },
     methods: {
@@ -32,6 +34,9 @@ Vue.component('add-card-form', {
                 this.name = null;
             } else {
                 this.errors.push("Name is required.");
+            }
+            if (this.newItem.length < 3) {
+                this.errors.push("Please enter at least 3 options.");
             }
         }
     }
@@ -153,7 +158,6 @@ new Vue({
         nextCardId: 1,
     },
     methods: {
-        // Добавление новой карточки
         addCard(cardName) {
             const newCard = {
                 id: this.nextCardId++,
@@ -170,11 +174,24 @@ new Vue({
             }
         },
 
-        // Поиск карточки по id во всех колонках
         findCardById(id) {
-            return this.firstColumnCards.find(c => c.id === id) ||
-                this.secondColumnCards.find(c => c.id === id) ||
-                this.thirdColumnCards.find(c => c.id === id);
+            return this.firstColumnCards.find(card => card.id === id) ||
+                this.secondColumnCards.find(card => card.id === id) ||
+                this.thirdColumnCards.find(card => card.id === id);
+        },
+
+        getCompletionPercent(card) {
+            if (!card.items.length) return 0;
+            const completedCount = card.items.filter(item => item.completed).length;
+            return (completedCount / card.items.length) * 100;
+        },
+
+        moveCard(card, fromArray, toArray) {
+            const index = fromArray.indexOf(card);
+            if (index !== -1) {
+                fromArray.splice(index, 1);
+                toArray.push(card);
+            }
         },
     }
 });
