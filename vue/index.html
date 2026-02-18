@@ -12,18 +12,12 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <title>Лучшие заметки</title>
 </head>
 <body>
-<!--<div id="app">-->
-<!--    <first-column :cards="firstColumnCards" :max="firstMax" ></first-column>-->
-<!--    <second-column :cards="secondColumnCards" :max="secondMax"></second-column>-->
-<!--    <third-column :cards="thirdColumnCards"></third-column>-->
-<!--&lt;!&ndash;    <card @card-submit="addCard"></card>&ndash;&gt;-->
-<!--</div>-->
 <div id="app">
     <add-card-form @add-card="addCard"></add-card-form>
     <div class="columns">
-        <first-column :cards="firstColumnCards" :max="firstMax" column-name="First"></first-column>
-        <second-column :cards="secondColumnCards" :max="secondMax"></second-column>
-        <third-column :cards="thirdColumnCards"></third-column>
+        <first-column :cards="firstColumnCards" :max="firstMax" column-name="First" @toggle-item="handleToggleItem"></first-column>
+        <second-column :cards="secondColumnCards" :max="secondMax" @toggle-item="handleToggleItem"></second-column>
+        <third-column :cards="thirdColumnCards" @toggle-item="handleToggleItem"></third-column>
     </div>
 </div>
 </body>

@@ -44,7 +44,8 @@ Vue.component('card-item', {
     data() {
         return {
             newItem: '',
-            errorMessage: ''
+            errorMessage: '',
+            locked: Boolean,
         };
     },
     methods: {
@@ -61,6 +62,13 @@ Vue.component('card-item', {
             this.card.items.push({ text, completed: false });
             this.newItem = '';
             this.errorMessage = '';
+        },
+        onToggle(itemIndex, event) {
+            this.$emit('toggle-item', {
+                cardId: this.card.id,
+                itemIndex: itemIndex,
+                completed: event.target.checked
+            });
         }
     },
     template: `
@@ -68,7 +76,7 @@ Vue.component('card-item', {
             <h3>{{ card.name }}</h3>
             <ul>
                 <li v-for="(item, idx) in card.items" :key="idx">
-                    <input type="checkbox" v-model="item.completed">
+                    <input type="checkbox" v-model="item.completed" @change="onToggle(idx, $event)">
                     <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
                         {{ item.text }}
                     </span>
@@ -83,6 +91,8 @@ Vue.component('card-item', {
                 >
                 <button @click="addItem">Add</button>
                 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+                <p v-if="card.completedAt" class="completed-date">
+                   Completed: {{ card.completedAt }}</p>
             </div>
         </div>
     `
@@ -99,7 +109,7 @@ Vue.component('first-column', {
         <div class="column">
           <h2>{{ columnName }} Column (max {{ max }})</h2>
           <p v-if="!cards.length">There are no cards yet.</p>
-          <card-item v-for="card in cards" :key="card.id" :card="card"></card-item>
+          <card-item v-for="card in cards" :key="card.id" :card="card"  @toggle-item="$emit('toggle-item', $event)"></card-item>
         </div>
       `
 });
@@ -113,7 +123,7 @@ Vue.component('second-column', {
         <div class="column">
           <h2>Second Column (max {{ max }})</h2>
           <p v-if="!cards.length">There are no cards yet.</p>
-          <card-item v-for="card in cards" :key="card.id" :card="card"></card-item>
+          <card-item v-for="card in cards" :key="card.id" :card="card"  @toggle-item="$emit('toggle-item', $event)"></card-item>
         </div>
       `
 });
@@ -126,7 +136,7 @@ Vue.component('third-column', {
         <div class="column">
           <h2>Third Column (unlimited)</h2>
           <p v-if="!cards.length">There are no cards yet.</p>
-          <card-item v-for="card in cards" :key="card.id" :card="card"></card-item>
+          <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
         </div>
       `
 });
@@ -143,13 +153,14 @@ new Vue({
         nextCardId: 1,
     },
     methods: {
+        // Добавление новой карточки
         addCard(cardName) {
             const newCard = {
                 id: this.nextCardId++,
                 name: cardName,
                 items: [],
+                completedAt: null,
             };
-
             if (this.firstColumnCards.length < this.firstMax) {
                 this.firstColumnCards.push(newCard);
             } else if (this.secondColumnCards.length < this.secondMax) {
@@ -157,6 +168,13 @@ new Vue({
             } else {
                 this.thirdColumnCards.push(newCard);
             }
-        }
-    },
+        },
+
+        // Поиск карточки по id во всех колонках
+        findCardById(id) {
+            return this.firstColumnCards.find(c => c.id === id) ||
+                this.secondColumnCards.find(c => c.id === id) ||
+                this.thirdColumnCards.find(c => c.id === id);
+        },
+    }
 });
