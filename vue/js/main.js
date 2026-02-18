@@ -4,7 +4,7 @@ Vue.component('add-card-form', {
     template: `
     <form class="review-form" @submit.prevent="onSubmit">
       <p v-if="errors.length">
-        <b>Please correct the following error(s):</b>
+        <b>Please correct the following error:</b>
         <ul>
           <li v-for="error in errors">{{ error }}</li>
         </ul>
@@ -39,7 +39,7 @@ Vue.component('add-card-form', {
 // Компонент одной карточки с возможностью добавлять элементы списка
 Vue.component('card-item', {
     props: {
-        card: { type: Object, required: true }
+        card: {type: Object, required: true}
     },
     template: `
         <div class="card">
@@ -50,22 +50,33 @@ Vue.component('card-item', {
           <div>
             <input v-model="newItem" @keyup.enter="addItem" placeholder="New item">
             <button @click="addItem">Add</button>
+             <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
           </div>
+       
         </div>
       `,
     data() {
         return {
-            newItem: ''
+            newItem: '',
+            errorMessage: ''
+
+
         };
     },
     methods: {
         addItem() {
             if (this.newItem.trim()) {
+                if (this.card.items.length >= 5) {
+                    this.errorMessage = 'maximum five points per card';
+                    return;
+                }
                 this.card.items.push(this.newItem.trim());
                 this.newItem = '';
+            } else {
+                if (!this.newItem) this.errors.push("maximum five points per card.")
             }
         }
-    }
+    },
 });
 
 // Столбцы
@@ -120,7 +131,7 @@ new Vue({
         firstColumnCards: [],
         secondColumnCards: [],
         thirdColumnCards: [],
-        nextCardId: 1
+        nextCardId: 1,
     },
     methods: {
         addCard(cardName) {
@@ -138,5 +149,5 @@ new Vue({
                 this.thirdColumnCards.push(newCard);
             }
         }
-    }
+    },
 });
