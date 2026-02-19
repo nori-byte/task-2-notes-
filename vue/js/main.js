@@ -45,12 +45,10 @@
 </span>
 </li>
 </ul>
-<!--<div>-->
-<!--    <input type="text" v-model="newItem" @keyup.enter="addItem" placeholder="New item">-->
-<!--    <button @click="addItem">Add</button>-->
-<!--<p v-if="errorMessage" class="error">{{ errorMessage }}</p>-->
-<!--<p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>-->
-<!--</div>-->
+<div>
+<p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+<p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>
+</div>
 </div>
 
 `
@@ -194,6 +192,8 @@ new Vue({
         thirdColumnCards: [],
         nextCardId: 1,
     },
+    computed() {
+    },
     created() {
         this.loadFromLocalStorage();
     },
@@ -250,6 +250,17 @@ new Vue({
         handleToggleItem({cardId, itemIndex, completed}) {
             const card = this.findCardById(cardId);
             if (!card) return;
+            // let secondFive = this.secondColumnCards.length === 5;
+            // let hasReadyCardFirst = this.firstColumnCards.some(card => {
+            //     let done = 0;
+            //     for (let i = 0; i < card.items.length; i++) {
+            //         if (card.items[i].completed) done++;
+            //     }
+            //     return done > card.items.length / 2;
+            // })
+            // if (secondFive && hasReadyCardFirst.includes(card)) {
+            //     return;
+            // }
 
             const percent = this.getCompletionPercent(card);
 
