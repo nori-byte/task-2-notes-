@@ -152,7 +152,6 @@ Vue.component('third-column', {
       `
 });
 
-// Корневой экземпляр
 new Vue({
     el: '#app',
     data: {
@@ -162,6 +161,14 @@ new Vue({
         secondColumnCards: [],
         thirdColumnCards: [],
         nextCardId: 1,
+    },
+    created() {
+        this.loadFromLocalStorage();
+    },
+    watch: {
+        firstColumnCards: { handler: 'saveToLocalStorage', deep: true },
+        secondColumnCards: { handler: 'saveToLocalStorage', deep: true },
+        thirdColumnCards: { handler: 'saveToLocalStorage', deep: true }
     },
     methods: {
         addCard(cardName) {
@@ -178,6 +185,7 @@ new Vue({
             } else {
                 this.thirdColumnCards.push(newCard);
             }
+            this.saveToLocalStorage();
         },
 
         findCardById(id) {
@@ -227,6 +235,29 @@ new Vue({
             if (targetColumn && targetColumn !== currentColumn) {
                 this.moveCard(card, currentColumn, targetColumn);
             }
+        },
+        loadFromLocalStorage() {
+            const saved = localStorage.getItem('trelloData');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    this.firstColumnCards = data.firstColumnCards || [];
+                    this.secondColumnCards = data.secondColumnCards || [];
+                    this.thirdColumnCards = data.thirdColumnCards || [];
+                    this.nextCardId = data.nextCardId || 1;
+                } catch (e) {
+                    console.error('Ошибка загрузки', e);
+                }
+            }
+        },
+        saveToLocalStorage() {
+            const data = {
+                firstColumnCards: this.firstColumnCards,
+                secondColumnCards: this.secondColumnCards,
+                thirdColumnCards: this.thirdColumnCards,
+                nextCardId: this.nextCardId
+            };
+            localStorage.setItem('trelloData', JSON.stringify(data));
         }
     }
 });
