@@ -7,15 +7,20 @@
 }
 input::placeholder {
     background: #84e0bb;
+
 }
 button {
     background: #54f5f5;
     border-radius: 5px;
-    width: 50px;
+    width: 100px;
+    height: 40px;
+    font-size: 20px;
 }
 input[type="submit" i]  {
     background: #88e0e0;
     border-radius: 5px;
+
+
 }
 .column-item {
     display: flex;

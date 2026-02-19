@@ -1,155 +1,187 @@
 
-// Компонент формы для добавления новой карточки
+    Vue.component('card-item', {
+    props: {
+    card: { type: Object, required: true }
+},
+    data() {
+    return {
+    newItem: '',
+    errorMessage: '',
+};
+},
+    methods: {
+    addItem() {
+    const text = this.newItem.trim();
+    if (!text) {
+    this.errorMessage = 'Item cannot be empty.';
+    return;
+}
+    if (this.card.items.length >= 5) {
+    this.errorMessage = 'Maximum five points per card';
+    return;
+}
+    this.card.items.push({ text, completed: false });
+    this.newItem = '';
+    this.errorMessage = '';
+},
+    onToggle(itemIndex, event) {
+    this.$emit('toggle-item', {
+    cardId: this.card.id,
+    itemIndex: itemIndex,
+    completed: event.target.checked
+});
+}
+},
+    template: `
+
+    <div class="card">
+    <h3>{{ card.name }}</h3>
+
+<ul>
+    <li v-for="(item, idx) in card.items" :key="idx">
+    <input type="checkbox" v-model="item.completed" @change="onToggle(idx, $event)">
+    <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
+    {{ item.text }}
+</span>
+</li>
+</ul>
+<!--<div>-->
+<!--    <input type="text" v-model="newItem" @keyup.enter="addItem" placeholder="New item">-->
+<!--    <button @click="addItem">Add</button>-->
+<!--<p v-if="errorMessage" class="error">{{ errorMessage }}</p>-->
+<!--<p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>-->
+<!--</div>-->
+</div>
+
+`
+
+});
+
 Vue.component('add-card-form', {
     template: `
-    <form class="review-form" @submit.prevent="onSubmit">
-      <p v-if="errors.length">
-        <b>Please correct the following error:</b>
-        <ul>
-          <li v-for="error in errors">{{ error }}</li>
-        </ul>
-      </p>
-      <p>
-        <label for="name">Card name:</label>
-        <input id="name" v-model="name" placeholder="Enter card name">
-      </p>
-      <p>
-        <input type="submit" value="Add card">
-      </p>
-    </form>
-  `,
-    data() {
-        return {
-            name: null,
-            errors: [],
-            newItem: [],
 
-        }
-    },
-    methods: {
-        onSubmit() {
-            this.errors = [];
-            if (this.name && this.name.trim()) {
-                this.$emit('add-card', this.name.trim());
-                this.name = null;
-            } else {
-                this.errors.push("Name is required.");
+                <form @submit.prevent="onSubmit">
+                    <p v-if="errors.length">
+                        <b>Please correct the following error:</b>
+                    <ul>
+                        <li v-for="error in errors">{{ error }}</li>
+                    </ul>
+                    </p>
+                    <p>
+                        <label for="name">Card name:</label>
+                        <input id="name" v-model="name" placeholder="Enter card name">
+                    </p>
+                    <div>
+                        <h4>Add items (min 3):</h4>
+                        <ul v-if="tempItems.length">
+                            <li v-for="(item, idx) in tempItems" :key="idx">
+                                {{ item }}
+                                <button type="button" @click="removeTempItem(idx)">✖</button>
+                            </li>
+</ul>
+                        <div>
+                            <input type="text" v-model="newItem" @keyup.enter="addTempItem" placeholder="Enter item">
+                            <button type="button" @click="addTempItem">Add item</button>
+                        </div>
+                        <p>Added: {{ tempItems.length }}/3</p>
+                    </div>
+                    <p>
+                        <input type="submit" value="Add card" :disabled="tempItems.length < 3 || !name">
+                    </p>
+                </form>
+            `,
+            data() {
+                return {
+                    name: '',
+                    newItem: '',
+                    tempItems: [],
+                    errors: [],
+                };
+            },
+            methods: {
+                addTempItem() {
+                    const text = this.newItem.trim();
+                    if (text) {
+                        this.tempItems.push(text);
+                        this.newItem = '';
+                    }
+                },
+                removeTempItem(index) {
+                    this.tempItems.splice(index, 1);
+                },
+                onSubmit() {
+                    this.errors = [];
+                    if (!this.name.trim()) {
+                        this.errors.push("Card name is required.");
+                    }
+                    if (this.tempItems.length < 3) {
+                        this.errors.push("Please add at least 3 items.");
+                    }
+                    if (this.errors.length) return;
+                    
+                    this.$emit('add-card', {
+                        name: this.name.trim(),
+                        items: this.tempItems
+                    });
+                    
+                    this.name = '';
+                    this.tempItems = [];
+                    this.newItem = '';
+                }
             }
-            // if (this.newItem.length < 3) {
-            //     this.errors.push("Please enter at least 3 options.");
-            // }
-        }
-    }
-});
-// Компонент одной карточки с возможностью добавлять элементы списка
-Vue.component('card-item', {
-    props: {
-        card: { type: Object, required: true }
-    },
-    data() {
-        return {
-            newItem: '',
-            errorMessage: '',
-            locked: Boolean,
-        };
-    },
-    methods: {
-        addItem() {
-            const text = this.newItem.trim();
-            if (!text) {
-                this.errorMessage = 'Item cannot be empty.';
-                return;
-            }
-            if (this.card.items.length >= 5) {
-                this.errorMessage = 'Maximum five points per card';
-                return;
-            }
-            this.card.items.push({ text, completed: false });
-            this.newItem = '';
-            this.errorMessage = '';
-        },
-        onToggle(itemIndex, event) {
-            this.$emit('toggle-item', {
-                cardId: this.card.id,
-                itemIndex: itemIndex,
-                completed: event.target.checked
-            });
-        }
-    },
-    template: `
-        <div class="card">
-            <h3>{{ card.name }}</h3>
-            <ul>
-                <li v-for="(item, idx) in card.items" :key="idx">
-                    <input type="checkbox" v-model="item.completed" @change="onToggle(idx, $event)">
-                    <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
-                        {{ item.text }}
-                    </span>
-                </li>
-            </ul>
-            <div class="item-new">
-                <input 
-                    type="text" 
-                    v-model="newItem" 
-                    @keyup.enter="addItem" 
-                    placeholder="New item"
-                >
-                <button @click="addItem">Add</button>
-                <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-                <p v-if="card.completedAt" class="completed-date">
-                   Completed: {{ card.completedAt }}</p>
-            </div>
-        </div>
-    `
-});
+        });
 
-// Столбцы
-Vue.component('first-column', {
-    props: {
-        cards: Array,
-        max: Number,
-        columnName: String
-    },
-    template: `
-        <div class="column">
-          <h2>First column</h2>
-          <div class="column-item">
-          <p v-if="!cards.length">There are no cards yet.</p>
-          <card-item v-for="card in cards" :key="card.id" :card="card"  @toggle-item="$emit('toggle-item', $event)"></card-item>
-        </div>
-        </div>
-      `
-});
+        Vue.component('first-column', {
+            props: {
+                cards: Array,
+                max: Number,
+            },
+            template: `
+                <div>
+                    <h2>First column (max {{ max }})</h2>
+                    <div>
+                        <p v-if="!cards.length">There are no cards yet.</p>
+                        <div class="column-item">
+                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                    </div>
+                </div>
+                </div>
+          `,
+        });
 
-Vue.component('second-column', {
-    props: {
-        cards: Array,
-        max: Number
-    },
-    template: `
-        <div class="column">
-          <h2>Second column</h2>
-          <div class="column-item">
-          <p v-if="!cards.length">There are no cards yet.</p>
-          <card-item v-for="card in cards" :key="card.id" :card="card"  @toggle-item="$emit('toggle-item', $event)"></card-item>
-        </div>
-        </div>
-      `
-});
+        Vue.component('second-column', {
+            props: {
+                cards: Array,
+                max: Number
+            },
+            template: `
+                <div>
+                    <h2>Second column (max {{ max }})</h2>
+                    <div>
+                        <p v-if="!cards.length">There are no cards yet.</p>
+                        <div class="column-item">
+                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                    </div>
+                </div>
+                </div>
+    `,
+        });
 
-Vue.component('third-column', {
-    props: {
-        cards: Array
-    },
-    template: `
-        <div class="column">
-          <h2>Third Column</h2>
-          <div class="column-item">
-          <p v-if="!cards.length">There are no cards yet.</p>
-          <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
-        </div>
-        </div>
-      `
+        Vue.component('third-column', {
+            props: {
+                cards: Array
+            },
+            template:  `
+                <div>
+                    <h2>Third Column</h2>
+                    <div>
+                        <p v-if="!cards.length">There are no cards yet.</p>
+                        <div class="column-item">
+                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                    </div>
+                </div>
+                </div>
+            `,
 });
 
 new Vue({
@@ -166,18 +198,24 @@ new Vue({
         this.loadFromLocalStorage();
     },
     watch: {
-        firstColumnCards: { handler: 'saveToLocalStorage', deep: true },
-        secondColumnCards: { handler: 'saveToLocalStorage', deep: true },
-        thirdColumnCards: { handler: 'saveToLocalStorage', deep: true }
+        firstColumnCards: {handler: 'saveToLocalStorage', deep: true},
+        secondColumnCards: {handler: 'saveToLocalStorage', deep: true},
+        thirdColumnCards: {handler: 'saveToLocalStorage', deep: true}
     },
     methods: {
-        addCard(cardName) {
+        addCard(cardData) {
+            const items = cardData.items.map(text => ({
+                text: text,
+                completed: false
+            }));
+
             const newCard = {
                 id: this.nextCardId++,
-                name: cardName,
-                items: [],
+                name: cardData.name,
+                items: items,
                 completedAt: null,
             };
+
             if (this.firstColumnCards.length < this.firstMax) {
                 this.firstColumnCards.push(newCard);
             } else if (this.secondColumnCards.length < this.secondMax) {
@@ -185,6 +223,7 @@ new Vue({
             } else {
                 this.thirdColumnCards.push(newCard);
             }
+
             this.saveToLocalStorage();
         },
 
@@ -208,7 +247,7 @@ new Vue({
             }
         },
 
-        handleToggleItem({ cardId, itemIndex, completed }) {
+        handleToggleItem({cardId, itemIndex, completed}) {
             const card = this.findCardById(cardId);
             if (!card) return;
 
@@ -236,6 +275,7 @@ new Vue({
                 this.moveCard(card, currentColumn, targetColumn);
             }
         },
+
         loadFromLocalStorage() {
             const saved = localStorage.getItem('trelloData');
             if (saved) {
@@ -250,6 +290,7 @@ new Vue({
                 }
             }
         },
+
         saveToLocalStorage() {
             const data = {
                 firstColumnCards: this.firstColumnCards,
@@ -258,6 +299,7 @@ new Vue({
                 nextCardId: this.nextCardId
             };
             localStorage.setItem('trelloData', JSON.stringify(data));
-        }
+        },
     }
 });
+
