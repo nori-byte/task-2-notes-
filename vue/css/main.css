@@ -1,6 +1,36 @@
 .card {
     background: #a9ead0;
-    width: 300px;
-    height: 200px;
+    width: 350px;
+    height: 250px;
     border-radius: 20px;
+    border: 2px solid #00a7a7;
+}
+input::placeholder {
+    background: #84e0bb;
+}
+button {
+    background: #54f5f5;
+    border-radius: 5px;
+    width: 50px;
+}
+input[type="submit" i]  {
+    background: #88e0e0;
+    border-radius: 5px;
+}
+.column-item {
+    display: flex;
+    gap:15px;
+
+}
+body {
+    padding: 30px;
+}
+h3 {
+    text-align: center;
+}
+.item-new {
+padding: 5px;
+}
+span {
+    font-size: 20px;
 }
