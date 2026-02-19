@@ -192,6 +192,41 @@ new Vue({
             return (completedCount / card.items.length) * 100;
         },
 
+        moveCard(card, fromArray, toArray) {
+            const index = fromArray.indexOf(card);
+            if (index !== -1) {
+                fromArray.splice(index, 1);
+                toArray.push(card);
+            }
+        },
 
+        handleToggleItem({ cardId, itemIndex, completed }) {
+            const card = this.findCardById(cardId);
+            if (!card) return;
+
+            const percent = this.getCompletionPercent(card);
+
+            let currentColumn = null;
+            let targetColumn = null;
+
+            if (this.firstColumnCards.includes(card)) {
+                currentColumn = this.firstColumnCards;
+                if (percent > 50) {
+                    targetColumn = this.secondColumnCards;
+                }
+            } else if (this.secondColumnCards.includes(card)) {
+                currentColumn = this.secondColumnCards;
+                if (percent === 100) {
+                    targetColumn = this.thirdColumnCards;
+                    card.completedAt = new Date().toLocaleString();
+                }
+            } else {
+                return;
+            }
+
+            if (targetColumn && targetColumn !== currentColumn) {
+                this.moveCard(card, currentColumn, targetColumn);
+            }
+        }
     }
 });
