@@ -260,7 +260,7 @@ new Vue({
             // })
             // if (secondFive && hasReadyCardFirst.includes(card)) {
             //     return;
-            // }
+            //}
 
             const percent = this.getCompletionPercent(card);
 
