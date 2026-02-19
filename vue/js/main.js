@@ -35,9 +35,9 @@ Vue.component('add-card-form', {
             } else {
                 this.errors.push("Name is required.");
             }
-            if (this.newItem.length < 3) {
-                this.errors.push("Please enter at least 3 options.");
-            }
+            // if (this.newItem.length < 3) {
+            //     this.errors.push("Please enter at least 3 options.");
+            // }
         }
     }
 });
