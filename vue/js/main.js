@@ -207,11 +207,11 @@ new Vue({
     created() {
         this.loadFromLocalStorage();
     },
-    // watch: {
-    //     firstColumnCards: {handler: 'saveToLocalStorage', deep: true},
-    //     secondColumnCards: {handler: 'saveToLocalStorage', deep: true},
-    //     thirdColumnCards: {handler: 'saveToLocalStorage', deep: true}
-    // },
+    watch: {
+        firstColumnCards: {handler: 'saveToLocalStorage', deep: true},
+        secondColumnCards: {handler: 'saveToLocalStorage', deep: true},
+        thirdColumnCards: {handler: 'saveToLocalStorage', deep: true}
+    },
     methods: {
         addCard(cardData) {
             const items = cardData.items.map(text => ({
