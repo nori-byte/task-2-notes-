@@ -1,8 +1,9 @@
 
     Vue.component('card-item', {
     props: {
-    card: { type: Object, required: true }
-},
+    card: { type: Object, required: true },
+        disabled: { type: Boolean, default: false }
+    },
     data() {
     return {
     newItem: '',
@@ -37,14 +38,18 @@
     <div class="card">
     <h3>{{ card.name }}</h3>
 
-<ul>
-    <li v-for="(item, idx) in card.items" :key="idx">
-    <input type="checkbox" v-model="item.completed" @change="onToggle(idx, $event)">
+<p v-for="(item, idx) in card.items" :key="idx">
+    <input
+        v-if="!card.completedAt"
+        type="checkbox"
+        v-model="item.completed"
+        @change="onToggle(idx, $event)"
+        :disabled="disabled"  
+    >
     <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
-    {{ item.text }}
-</span>
-</li>
-</ul>
+        {{ item.text }}
+    </span>
+</p>
 <div>
 <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
 <p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>
@@ -74,12 +79,11 @@ Vue.component('add-card-form', {
                         <ul v-if="tempItems.length">
                             <li v-for="(item, idx) in tempItems" :key="idx">
                                 {{ item }}
-                                <button type="button" @click="removeTempItem(idx)">✖</button>
                             </li>
 </ul>
                         <div>
                             <input type="text" v-model="newItem" @keyup.enter="addTempItem" placeholder="Enter item">
-                            <button type="button" @click="addTempItem">Add item</button>
+                            <button type="button" :disabled="tempItems.length >= 5" @click="addTempItem">Add item</button>
                         </div>
                         <p>Added: {{ tempItems.length }}/3</p>
                     </div>
@@ -116,12 +120,12 @@ Vue.component('add-card-form', {
                         this.errors.push("Please add at least 3 items.");
                     }
                     if (this.errors.length) return;
-                    
+
                     this.$emit('add-card', {
                         name: this.name.trim(),
                         items: this.tempItems
                     });
-                    
+
                     this.name = '';
                     this.tempItems = [];
                     this.newItem = '';
@@ -133,6 +137,7 @@ Vue.component('add-card-form', {
             props: {
                 cards: Array,
                 max: Number,
+                locked: Boolean,
             },
             template: `
                 <div>
@@ -140,12 +145,13 @@ Vue.component('add-card-form', {
                     <div>
                         <p v-if="!cards.length">There are no cards yet.</p>
                         <div class="column-item">
-                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"  :disabled="locked"></card-item>
                     </div>
                 </div>
                 </div>
           `,
         });
+
 
         Vue.component('second-column', {
             props: {
@@ -192,16 +198,20 @@ new Vue({
         thirdColumnCards: [],
         nextCardId: 1,
     },
-    computed() {
+    computed: {
+        isFirstColumnLocked() {
+            return this.secondColumnCards.length >= this.secondMax &&
+                this.firstColumnCards.some(card => this.getCompletionPercent(card) >= 50);
+        }
     },
     created() {
         this.loadFromLocalStorage();
     },
-    watch: {
-        firstColumnCards: {handler: 'saveToLocalStorage', deep: true},
-        secondColumnCards: {handler: 'saveToLocalStorage', deep: true},
-        thirdColumnCards: {handler: 'saveToLocalStorage', deep: true}
-    },
+    // watch: {
+    //     firstColumnCards: {handler: 'saveToLocalStorage', deep: true},
+    //     secondColumnCards: {handler: 'saveToLocalStorage', deep: true},
+    //     thirdColumnCards: {handler: 'saveToLocalStorage', deep: true}
+    // },
     methods: {
         addCard(cardData) {
             const items = cardData.items.map(text => ({
@@ -250,17 +260,9 @@ new Vue({
         handleToggleItem({cardId, itemIndex, completed}) {
             const card = this.findCardById(cardId);
             if (!card) return;
-            // let secondFive = this.secondColumnCards.length === 5;
-            // let hasReadyCardFirst = this.firstColumnCards.some(card => {
-            //     let done = 0;
-            //     for (let i = 0; i < card.items.length; i++) {
-            //         if (card.items[i].completed) done++;
-            //     }
-            //     return done > card.items.length / 2;
-            // })
-            // if (secondFive && hasReadyCardFirst.includes(card)) {
-            //     return;
-            //}
+            if (this.firstColumnCards.includes(card) && this.isFirstColumnLocked) {
+                return;
+            }
 
             const percent = this.getCompletionPercent(card);
 
@@ -278,7 +280,7 @@ new Vue({
                     targetColumn = this.thirdColumnCards;
                     card.completedAt = new Date().toLocaleString();
                 }
-            } else {
+            } else if (this.secondColumnCards.length >=5 && this.firstColumnCards  ) {
                 return;
             }
 
@@ -313,4 +315,6 @@ new Vue({
         },
     }
 });
+
+
 
