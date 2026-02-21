@@ -13,7 +13,7 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
 </head>
 <body>
 <div id="app">
-    <add-card-form @add-card="addCard"></add-card-form>
+    <add-card-form @add-card="addCard" :form-disabled="!canAddNewCard"></add-card-form>
     <div class="columns">
         <first-column :cards="firstColumnCards" :max="firstMax" column-name="First" @toggle-item="handleToggleItem" :locked="isFirstColumnLocked"></first-column>
         <second-column :cards="secondColumnCards" :max="secondMax" @toggle-item="handleToggleItem"></second-column>

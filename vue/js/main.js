@@ -61,6 +61,9 @@
 });
 
 Vue.component('add-card-form', {
+    props: {
+        formDisabled: { type: Boolean, default: false }
+    },
     template: `
 
                 <form @submit.prevent="onSubmit">
@@ -91,7 +94,7 @@ Vue.component('add-card-form', {
                         <p>Added: {{ tempItems.length }}/5</p>
                     </div>
                     <p>
-                        <input type="submit" value="Add card" :disabled="tempItems.length < 3 || !name">
+                        <input type="submit" value="Add card"  :disabled="formDisabled ||tempItems.length < 3 || !name">
                     </p>
                 </form>
                 </div>
@@ -207,7 +210,11 @@ new Vue({
         isFirstColumnLocked() {
             return this.secondColumnCards.length >= this.secondMax &&
                 this.firstColumnCards.some(card => this.getCompletionPercent(card) >= 50);
-        }
+        },
+        canAddNewCard() {
+            return this.firstColumnCards.length < this.firstMax ||
+                this.secondColumnCards.length < this.secondMax;
+    }
     },
     created() {
         this.loadFromLocalStorage();
@@ -241,6 +248,12 @@ new Vue({
     },
     methods: {
         addCard(cardData) {
+            if (this.firstColumnCards.length >= this.firstMax &&
+                this.secondColumnCards.length >= this.secondMax) {
+                // Можно показать уведомление (например, alert или через data-свойство)
+                alert('Нельзя добавить новую карточку: первые две колонки заполнены.');
+                return;
+            }
             const items = cardData.items.map(text => ({
                 text: text,
                 completed: false
@@ -307,8 +320,6 @@ new Vue({
                     targetColumn = this.thirdColumnCards;
                     card.completedAt = new Date().toLocaleString();
                 }
-            // } else if (this.secondColumnCards.length >=5 && this.firstColumnCards  ) {
-            //     return;
             }
 
             if (targetColumn && targetColumn !== currentColumn) {
