@@ -213,9 +213,31 @@ new Vue({
         this.loadFromLocalStorage();
     },
     watch: {
-        firstColumnCards: {handler: 'saveToLocalStorage', deep: true},
-        secondColumnCards: {handler: 'saveToLocalStorage', deep: true},
-        thirdColumnCards: {handler: 'saveToLocalStorage', deep: true}
+        isFirstColumnLocked(newVal, oldVal) {
+            if (oldVal === true && newVal === false) {
+                const lastCard = this.firstColumnCards[this.firstColumnCards.length - 1];
+                if (lastCard) {
+                    for (let i = lastCard.items.length - 1; i >= 0; i--) {
+                        if (lastCard.items[i].completed) {
+                            this.$set(lastCard.items[i], 'completed', false);
+                            break;
+                        }
+                    }
+                }
+            }
+        },
+        firstColumnCards: {
+            handler: 'saveToLocalStorage',
+            deep: true
+        },
+        secondColumnCards: {
+            handler: 'saveToLocalStorage',
+            deep: true
+        },
+        thirdColumnCards: {
+            handler: 'saveToLocalStorage',
+            deep: true
+        }
     },
     methods: {
         addCard(cardData) {
@@ -285,8 +307,8 @@ new Vue({
                     targetColumn = this.thirdColumnCards;
                     card.completedAt = new Date().toLocaleString();
                 }
-            } else if (this.secondColumnCards.length >=5 && this.firstColumnCards  ) {
-                return;
+            // } else if (this.secondColumnCards.length >=5 && this.firstColumnCards  ) {
+            //     return;
             }
 
             if (targetColumn && targetColumn !== currentColumn) {
