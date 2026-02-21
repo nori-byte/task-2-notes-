@@ -70,6 +70,9 @@ Vue.component('add-card-form', {
                         <li v-for="error in errors">{{ error }}</li>
                     </ul>
                     </p>
+                    <h3>Notes</h3>
+                    <div class="notes">
+                    <div class="note">
                     <p>
                         <label for="name">Card name:</label>
                         <input id="name" v-model="name" placeholder="Enter card name">
@@ -85,12 +88,14 @@ Vue.component('add-card-form', {
                             <input type="text" v-model="newItem" @keyup.enter="addTempItem" placeholder="Enter item">
                             <button type="button" :disabled="tempItems.length >= 5" @click="addTempItem">Add item</button>
                         </div>
-                        <p>Added: {{ tempItems.length }}/3</p>
+                        <p>Added: {{ tempItems.length }}/5</p>
                     </div>
                     <p>
                         <input type="submit" value="Add card" :disabled="tempItems.length < 3 || !name">
                     </p>
                 </form>
+                </div>
+                </div>
             `,
             data() {
                 return {

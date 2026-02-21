@@ -1,24 +1,37 @@
 .card {
     background: #a9ead0;
     width: 350px;
-    height: 250px;
+    height: 310px;
     border-radius: 20px;
     border: 2px solid #00a7a7;
 }
-input::placeholder {
-    background: #84e0bb;
-
+#name, #text {
+    border: 1px solid #150801;
+    border-radius: 4px;
+    height: 2em;
+    padding: 3px;
 }
+input[type="text" i] {
+    border: 1px solid #150801;
+    border-radius: 4px;
+    height: 2em;
+    padding: 5px;
+}
+
 button {
-    background: #54f5f5;
+    background: #a9ead0;
     border-radius: 5px;
     width: 100px;
     height: 40px;
-    font-size: 20px;
+    font-size: 17px;
 }
 input[type="submit" i]  {
-    background: #88e0e0;
+    background: #a9ead0;
     border-radius: 5px;
+    border-radius: 5px;
+    width: 100px;
+    height: 40px;
+    font-size: 17px;
 
 
 }
@@ -38,4 +51,12 @@ padding: 5px;
 }
 span {
     font-size: 20px;
+}
+.notes {
+    border: 1px solid #150801;
+    width: 500px;
+    border-radius: 10px;
+}
+.note {
+    padding: 15px;
 }
