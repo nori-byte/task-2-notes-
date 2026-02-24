@@ -79,7 +79,7 @@ Vue.component('add-card-form', {
                         </p>
                         <p>
                 <label for="deadline">Deadline:</label>
-                <input type="date" id="deadline" v-model="deadline">
+                <input type="datetime-local" id="deadline" v-model="deadline">
             </p>
                         <div>
                             <h4>Add items (min 3):</h4>
