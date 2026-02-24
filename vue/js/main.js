@@ -1,63 +1,61 @@
 
-    Vue.component('card-item', {
+Vue.component('draggable', vuedraggable);
+
+Vue.component('card-item', {
     props: {
-    card: { type: Object, required: true },
+        card: { type: Object, required: true },
         disabled: { type: Boolean, default: false }
     },
     data() {
-    return {
-    newItem: '',
-    errorMessage: '',
-};
-},
+        return {
+            newItem: '',
+            errorMessage: '',
+        };
+    },
     methods: {
-    addItem() {
-    const text = this.newItem.trim();
-    if (!text) {
-    this.errorMessage = 'Item cannot be empty.';
-    return;
-}
-    if (this.card.items.length >= 5) {
-    this.errorMessage = 'Maximum five points per card';
-    return;
-}
-    this.card.items.push({ text, completed: false });
-    this.newItem = '';
-    this.errorMessage = '';
-},
-    onToggle(itemIndex, event) {
-    this.$emit('toggle-item', {
-    cardId: this.card.id,
-    itemIndex: itemIndex,
-    completed: event.target.checked
-});
-}
-},
+        addItem() {
+            const text = this.newItem.trim();
+            if (!text) {
+                this.errorMessage = 'Item cannot be empty.';
+                return;
+            }
+            if (this.card.items.length >= 5) {
+                this.errorMessage = 'Maximum five points per card';
+                return;
+            }
+            this.card.items.push({ text, completed: false });
+            this.newItem = '';
+            this.errorMessage = '';
+        },
+        onToggle(itemIndex, event) {
+            this.$emit('toggle-item', {
+                cardId: this.card.id,
+                itemIndex: itemIndex,
+                completed: event.target.checked
+            });
+        }
+    },
     template: `
-
-    <div class="card">
-    <h3>{{ card.name }}</h3>
-
-<p v-for="(item, idx) in card.items" :key="idx">
-    <input
-        v-if="!card.completedAt"
-        type="checkbox"
-        v-model="item.completed"
-        @change="onToggle(idx, $event)"
-        :disabled="disabled"  
-    >
-    <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
-        {{ item.text }}
-    </span>
-</p>
-<div>
-<p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-<p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>
-</div>
-</div>
-
-`
-
+            <div class="card">
+                <h3>{{ card.name }}</h3>
+                <p v-for="(item, idx) in card.items" :key="idx">
+                    <input
+                        v-if="!card.completedAt"
+                        type="checkbox"
+                        v-model="item.completed"
+                        @change="onToggle(idx, $event)"
+                        :disabled="disabled"  
+                    >
+                    <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
+                        {{ item.text }}
+                    </span>
+                </p>
+                <div>
+                    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+                    <p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>
+                </div>
+            </div>
+        `
 });
 
 Vue.component('add-card-form', {
@@ -65,136 +63,159 @@ Vue.component('add-card-form', {
         formDisabled: { type: Boolean, default: false }
     },
     template: `
-
-                <form @submit.prevent="onSubmit">
-                    <p v-if="errors.length">
-                        <b>Please correct the following error:</b>
+            <form @submit.prevent="onSubmit">
+                <p v-if="errors.length">
+                    <b>Please correct the following error:</b>
                     <ul>
                         <li v-for="error in errors">{{ error }}</li>
                     </ul>
-                    </p>
-                    <h3>Notes</h3>
-                    <div class="notes">
+                </p>
+                <h3>Notes</h3>
+                <div class="notes">
                     <div class="note">
-                    <p>
-                        <label for="name">Card name:</label>
-                        <input id="name" v-model="name" placeholder="Enter card name">
-                    </p>
-                    <div>
-                        <h4>Add items (min 3):</h4>
-                        <ul v-if="tempItems.length">
-                            <li v-for="(item, idx) in tempItems" :key="idx">
-                                {{ item }}
-                            </li>
-</ul>
+                        <p>
+                            <label for="name">Card name:</label>
+                            <input id="name" v-model="name" placeholder="Enter card name">
+                        </p>
                         <div>
-                            <input type="text" v-model="newItem" @keyup.enter="addTempItem" placeholder="Enter item">
-                            <button type="button" :disabled="tempItems.length >= 5" @click="addTempItem">Add item</button>
+                            <h4>Add items (min 3):</h4>
+                            <ul v-if="tempItems.length">
+                                <li v-for="(item, idx) in tempItems" :key="idx">
+                                    {{ item }}
+                                </li>
+                            </ul>
+                            <div>
+                                <input type="text" v-model="newItem" @keyup.enter="addTempItem" placeholder="Enter item">
+                                <button type="button" :disabled="tempItems.length >= 5" @click="addTempItem">Add item</button>
+                            </div>
+                            <p>Added: {{ tempItems.length }}/5</p>
                         </div>
-                        <p>Added: {{ tempItems.length }}/5</p>
+                        <p>
+                            <input type="submit" value="Add card"  :disabled="formDisabled || tempItems.length < 3 || !name">
+                        </p>
                     </div>
-                    <p>
-                        <input type="submit" value="Add card"  :disabled="formDisabled ||tempItems.length < 3 || !name">
-                    </p>
-                </form>
                 </div>
-                </div>
-            `,
-            data() {
-                return {
-                    name: '',
-                    newItem: '',
-                    tempItems: [],
-                    errors: [],
-                };
-            },
-            methods: {
-                addTempItem() {
-                    const text = this.newItem.trim();
-                    if (text) {
-                        this.tempItems.push(text);
-                        this.newItem = '';
-                    }
-                },
-                removeTempItem(index) {
-                    this.tempItems.splice(index, 1);
-                },
-                onSubmit() {
-                    this.errors = [];
-                    if (!this.name.trim()) {
-                        this.errors.push("Card name is required.");
-                    }
-                    if (this.tempItems.length < 3) {
-                        this.errors.push("Please add at least 3 items.");
-                    }
-                    if (this.errors.length) return;
-
-                    this.$emit('add-card', {
-                        name: this.name.trim(),
-                        items: this.tempItems
-                    });
-
-                    this.name = '';
-                    this.tempItems = [];
-                    this.newItem = '';
-                }
+            </form>
+        `,
+    data() {
+        return {
+            name: '',
+            newItem: '',
+            tempItems: [],
+            errors: [],
+        };
+    },
+    methods: {
+        addTempItem() {
+            const text = this.newItem.trim();
+            if (text) {
+                this.tempItems.push(text);
+                this.newItem = '';
             }
-        });
+        },
+        removeTempItem(index) {
+            this.tempItems.splice(index, 1);
+        },
+        onSubmit() {
+            this.errors = [];
+            if (!this.name.trim()) {
+                this.errors.push("Card name is required.");
+            }
+            if (this.tempItems.length < 3) {
+                this.errors.push("Please add at least 3 items.");
+            }
+            if (this.errors.length) return;
 
-        Vue.component('first-column', {
-            props: {
-                cards: Array,
-                max: Number,
-                locked: Boolean,
-            },
-            template: `
-                <div>
-                    <h2>First column (max {{ max }})</h2>
-                    <div>
-                        <p v-if="!cards.length">There are no cards yet.</p>
-                        <div class="column-item">
-                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"  :disabled="locked"></card-item>
-                    </div>
-                </div>
-                </div>
-          `,
-        });
+            this.$emit('add-card', {
+                name: this.name.trim(),
+                items: this.tempItems
+            });
 
-
-        Vue.component('second-column', {
-            props: {
-                cards: Array,
-                max: Number
-            },
-            template: `
-                <div>
-                    <h2>Second column (max {{ max }})</h2>
-                    <div>
-                        <p v-if="!cards.length">There are no cards yet.</p>
-                        <div class="column-item">
-                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
-                    </div>
-                </div>
-                </div>
-    `,
-        });
-
-        Vue.component('third-column', {
-            props: {
-                cards: Array
-            },
-            template:  `
-                <div>
-                    <h2>Third Column</h2>
-                    <div>
-                        <p v-if="!cards.length">There are no cards yet.</p>
-                        <div class="column-item">
-                        <card-item v-for="card in cards" :key="card.id" :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
-                    </div>
-                </div>
-                </div>
-            `,
+            this.name = '';
+            this.tempItems = [];
+            this.newItem = '';
+        }
+    }
 });
+
+Vue.component('first-column', {
+    props: {
+        value: { type: Array, required: true },
+        max: Number,
+        locked: Boolean,
+    },
+    computed: {
+        columnCards: {
+            get() { return this.value; },
+            set(newVal) { this.$emit('input', newVal); }
+        }
+    },
+    template: `
+        <div>
+            <h2>First column (max {{ max }})</h2>
+            <div>
+                <p v-if="!value.length">There are no cards yet.</p>
+                <draggable v-model="columnCards" :disabled="locked" item-key="id" tag="div" class="column-item">
+                    <div v-for="card in columnCards" :key="card.id">
+                        <card-item :card="card" @toggle-item="$emit('toggle-item', $event)" :disabled="locked"></card-item>
+                    </div>
+                </draggable>
+            </div>
+        </div>
+    `
+});
+
+Vue.component('second-column', {
+    props: {
+        value: { type: Array, required: true },
+        max: Number
+    },
+    computed: {
+        columnCards: {
+            get() { return this.value; },
+            set(newVal) { this.$emit('input', newVal); }
+        }
+    },
+    template: `
+        <div>
+            <h2>Second column (max {{ max }})</h2>
+            <div>
+                <p v-if="!value.length">There are no cards yet.</p>
+                <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
+                    <div v-for="card in columnCards" :key="card.id">
+                        <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                    </div>
+                </draggable>
+            </div>
+        </div>
+    `
+});
+
+Vue.component('third-column', {
+    props: {
+        value: { type: Array, required: true }
+    },
+    computed: {
+        columnCards: {
+            get() { return this.value; },
+            set(newVal) { this.$emit('input', newVal); }
+        }
+    },
+    template: `
+        <div>
+            <h2>Third Column</h2>
+            <div>
+                <p v-if="!value.length">There are no cards yet.</p>
+                <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
+                    <div v-for="card in columnCards" :key="card.id">
+                        <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                    </div>
+                </draggable>
+            </div>
+        </div>
+    `
+});
+
 
 new Vue({
     el: '#app',
@@ -209,12 +230,12 @@ new Vue({
     computed: {
         isFirstColumnLocked() {
             return this.secondColumnCards.length >= this.secondMax &&
-                this.firstColumnCards.some(card => this.getCompletionPercent(card) >= 50);
+                this.firstColumnCards.some(card => this.getCompletionPercent(card) > 50);
         },
         canAddNewCard() {
             return this.firstColumnCards.length < this.firstMax ||
                 this.secondColumnCards.length < this.secondMax;
-    }
+        }
     },
     created() {
         this.loadFromLocalStorage();
@@ -222,15 +243,7 @@ new Vue({
     watch: {
         isFirstColumnLocked(newVal, oldVal) {
             if (oldVal === true && newVal === false) {
-                const lastCard = this.firstColumnCards[this.firstColumnCards.length - 1];
-                if (lastCard) {
-                    for (let i = lastCard.items.length - 1; i >= 0; i--) {
-                        if (lastCard.items[i].completed) {
-                            this.$set(lastCard.items[i], 'completed', false);
-                            break;
-                        }
-                    }
-                }
+                this.processPendingMoves();
             }
         },
         firstColumnCards: {
@@ -248,12 +261,11 @@ new Vue({
     },
     methods: {
         addCard(cardData) {
-            if (this.firstColumnCards.length >= this.firstMax &&
-                this.secondColumnCards.length >= this.secondMax) {
-                // Можно показать уведомление (например, alert или через data-свойство)
-                alert('Нельзя добавить новую карточку: первые две колонки заполнены.');
+            if (this.firstColumnCards.length >= this.firstMax) {
+                alert('Нельзя добавить новую карточку: первая колонка заполнена (максимум 3).');
                 return;
             }
+
             const items = cardData.items.map(text => ({
                 text: text,
                 completed: false
@@ -266,14 +278,7 @@ new Vue({
                 completedAt: null,
             };
 
-            if (this.firstColumnCards.length < this.firstMax) {
-                this.firstColumnCards.push(newCard);
-            } else if (this.secondColumnCards.length < this.secondMax) {
-                this.secondColumnCards.push(newCard);
-            } else {
-                this.thirdColumnCards.push(newCard);
-            }
-
+            this.firstColumnCards.push(newCard);
             this.saveToLocalStorage();
         },
 
@@ -295,6 +300,34 @@ new Vue({
                 fromArray.splice(index, 1);
                 toArray.push(card);
             }
+        },
+
+        processPendingMoves() {
+            let moved;
+            do {
+                moved = false;
+
+                for (let i = 0; i < this.firstColumnCards.length; i++) {
+                    const card = this.firstColumnCards[i];
+                    if (this.getCompletionPercent(card) > 50 && this.secondColumnCards.length < this.secondMax) {
+                        this.moveCard(card, this.firstColumnCards, this.secondColumnCards);
+                        moved = true;
+                        break;
+                    }
+                }
+
+                if (moved) continue;
+
+                for (let i = 0; i < this.secondColumnCards.length; i++) {
+                    const card = this.secondColumnCards[i];
+                    if (this.getCompletionPercent(card) === 100 && !card.completedAt) {
+                        card.completedAt = new Date().toLocaleString();
+                        this.moveCard(card, this.secondColumnCards, this.thirdColumnCards);
+                        moved = true;
+                        break;
+                    }
+                }
+            } while (moved);
         },
 
         handleToggleItem({cardId, itemIndex, completed}) {
@@ -325,6 +358,8 @@ new Vue({
             if (targetColumn && targetColumn !== currentColumn) {
                 this.moveCard(card, currentColumn, targetColumn);
             }
+
+            this.processPendingMoves();
         },
 
         loadFromLocalStorage() {
@@ -340,6 +375,9 @@ new Vue({
                     console.error('Ошибка загрузки', e);
                 }
             }
+            this.$nextTick(() => {
+                this.processPendingMoves();
+            });
         },
 
         saveToLocalStorage() {
@@ -353,6 +391,4 @@ new Vue({
         },
     }
 });
-
-
 

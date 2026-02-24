@@ -9,18 +9,28 @@ initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <link rel="stylesheet" href="css/main.css">
     <script defer src="js/vue.min.js"></script>
     <script defer src="js/main.js"></script>
+
     <title>Лучшие заметки</title>
 </head>
 <body>
 <div id="app">
     <add-card-form @add-card="addCard" :form-disabled="!canAddNewCard"></add-card-form>
     <div class="columns">
-        <first-column :cards="firstColumnCards" :max="firstMax" column-name="First" @toggle-item="handleToggleItem" :locked="isFirstColumnLocked"></first-column>
-        <second-column :cards="secondColumnCards" :max="secondMax" @toggle-item="handleToggleItem"></second-column>
-        <third-column :cards="thirdColumnCards" @toggle-item="handleToggleItem"></third-column>
+        <first-column v-model="firstColumnCards" :max="firstMax" column-name="First" @toggle-item="handleToggleItem" :locked="isFirstColumnLocked"></first-column>
+        <second-column v-model="secondColumnCards" :max="secondMax" @toggle-item="handleToggleItem"></second-column>
+        <third-column v-model="thirdColumnCards" @toggle-item="handleToggleItem"></third-column>
     </div>
 </div>
+
+
+
+<script src="//cdn.jsdelivr.net/npm/sortablejs@1.8.4/Sortable.min.js"></script>
+<!-- CDNJS :: Vue.Draggable (https://cdnjs.com/) -->
+<script src="//cdnjs.cloudflare.com/ajax/libs/Vue.Draggable/2.20.0/vuedraggable.umd.min.js"></script>
+
+
 </body>
 </html>
+
 
 
