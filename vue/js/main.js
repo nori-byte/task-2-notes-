@@ -37,7 +37,7 @@ Vue.component('card-item', {
     },
     template: `
             <div class="card">
-                <h3>{{ card.name }}</h3>
+                <div class="nameCard">{{ card.name }}</div>
                 <p v-for="(item, idx) in card.items" :key="idx">
                     <input
                         v-if="!card.completedAt"
@@ -70,13 +70,17 @@ Vue.component('add-card-form', {
                         <li v-for="error in errors">{{ error }}</li>
                     </ul>
                 </p>
-                <h3>Notes</h3>
+            
                 <div class="notes">
                     <div class="note">
                         <p>
                             <label for="name">Card name:</label>
                             <input id="name" v-model="name" placeholder="Enter card name">
                         </p>
+                        <p>
+                <label for="deadline">Deadline:</label>
+                <input type="date" id="deadline" v-model="deadline">
+            </p>
                         <div>
                             <h4>Add items (min 3):</h4>
                             <ul v-if="tempItems.length">
@@ -103,6 +107,7 @@ Vue.component('add-card-form', {
             newItem: '',
             tempItems: [],
             errors: [],
+            deadline: '',
         };
     },
     methods: {
@@ -128,12 +133,14 @@ Vue.component('add-card-form', {
 
             this.$emit('add-card', {
                 name: this.name.trim(),
-                items: this.tempItems
+                items: this.tempItems,
+                deadline: this.deadline ? new Date(this.deadline).getTime() : null,
             });
 
             this.name = '';
             this.tempItems = [];
             this.newItem = '';
+            this.deadline = '';
         }
     }
 });
@@ -154,7 +161,7 @@ Vue.component('first-column', {
         <div>
             <h2>First column (max {{ max }})</h2>
             <div>
-                <p v-if="!value.length">There are no cards yet.</p>
+                <p v-if="!value.length">You haven't added any cards yet.</p>
                 <draggable v-model="columnCards" :disabled="locked" item-key="id" tag="div" class="column-item">
                     <div v-for="card in columnCards" :key="card.id">
                         <card-item :card="card" @toggle-item="$emit('toggle-item', $event)" :disabled="locked"></card-item>
@@ -180,7 +187,7 @@ Vue.component('second-column', {
         <div>
             <h2>Second column (max {{ max }})</h2>
             <div>
-                <p v-if="!value.length">There are no cards yet.</p>
+                <p v-if="!value.length">You haven't added any cards yet.</p>
                 <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
                     <div v-for="card in columnCards" :key="card.id">
                         <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
@@ -205,7 +212,7 @@ Vue.component('third-column', {
         <div>
             <h2>Third Column</h2>
             <div>
-                <p v-if="!value.length">There are no cards yet.</p>
+                <p v-if="!value.length">You haven't added any cards yet.</p>
                 <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
                     <div v-for="card in columnCards" :key="card.id">
                         <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
@@ -235,6 +242,26 @@ new Vue({
         canAddNewCard() {
             return this.firstColumnCards.length < this.firstMax ||
                 this.secondColumnCards.length < this.secondMax;
+        },
+        overdueCount() {
+            const now = Date.now();
+            const activeCards = [...this.firstColumnCards, ...this.secondColumnCards, ...this.thirdColumnCards];
+            return activeCards.filter(card => card.deadline && card.deadline < now).length;
+        },
+
+        // Пункт 5: отношение выполненных задач к невыполненным
+        totalStats() {
+            let total = 0;
+            let completed = 0;
+            const allCards = [...this.firstColumnCards, ...this.secondColumnCards, ...this.thirdColumnCards];
+            allCards.forEach(card => {
+                card.items.forEach(item => {
+                    total++;
+                    if (item.completed) completed++;
+                });
+            });
+            const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
+            return { completed, total, percent };
         }
     },
     created() {
@@ -260,6 +287,12 @@ new Vue({
         }
     },
     methods: {
+        overdueCardsCount() {
+            const now = Date.now();
+            // Считаем все карточки, которые ещё не выполнены (не в третьей колонке)
+            const activeCards = [...this.firstColumnCards, ...this.secondColumnCards];
+            return activeCards.filter(card => card.deadline && card.deadline < now).length;
+        },
         addCard(cardData) {
             if (this.firstColumnCards.length >= this.firstMax) {
                 alert('Нельзя добавить новую карточку: первая колонка заполнена (максимум 3).');
@@ -276,6 +309,7 @@ new Vue({
                 name: cardData.name,
                 items: items,
                 completedAt: null,
+                deadline: cardData.deadline || null,
             };
 
             this.firstColumnCards.push(newCard);
