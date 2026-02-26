@@ -1,7 +1,7 @@
 .card {
     background: #a9ead0;
-    width: 350px;
-    height: 310px;
+    width: 380px;
+    height: 380px;
     border-radius: 20px;
     border: 2px solid #00a7a7;
 }
@@ -78,7 +78,8 @@ h4 {
     font-size: 20px;
 }
 p {
-    font-size: 20px;
+    font-size: 16px;
+    padding-left: 30px;
 }
 h3 {
     font-size: 45px;
@@ -87,4 +88,7 @@ h3 {
     font-size: 25px;
     text-align: center;
     padding: 15px;
+}
+small {
+    font-size: 16px;
 }

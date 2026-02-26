@@ -1,4 +1,3 @@
-
 Vue.component('draggable', vuedraggable);
 
 Vue.component('card-item', {
@@ -33,29 +32,37 @@ Vue.component('card-item', {
                 itemIndex: itemIndex,
                 completed: event.target.checked
             });
+        },
+        formatDate(timestamp) {
+            if (!timestamp) return '—';
+            return new Date(timestamp).toLocaleString();
         }
     },
     template: `
-            <div class="card">
-                <div class="nameCard">{{ card.name }}</div>
-                <p v-for="(item, idx) in card.items" :key="idx">
-                    <input
-                        v-if="!card.completedAt"
-                        type="checkbox"
-                        v-model="item.completed"
-                        @change="onToggle(idx, $event)"
-                        :disabled="disabled"  
-                    >
-                    <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
-                        {{ item.text }}
-                    </span>
-                </p>
-                <div>
-                    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-                    <p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>
-                </div>
+        <div class="card">
+            <div class="nameCard">{{ card.name }}</div>
+            <p><small>Created: {{ card.createdAt || 'Unknown' }}</small></p>
+            <p v-if="card.deadline">
+                <small>Deadline: {{ formatDate(card.deadline) }}</small>
+            </p>
+            <p v-if="card.completedAt">Completed: {{ card.completedAt }}</p>
+            <p v-for="(item, idx) in card.items" :key="idx">
+                <input
+                    v-if="!card.completedAt"
+                    type="checkbox"
+                    v-model="item.completed"
+                    @change="onToggle(idx, $event)"
+                    :disabled="disabled"  
+                >
+                <span :style="{ textDecoration: item.completed ? 'line-through' : 'none' }">
+                    {{ item.text }}
+                </span>
+            </p>
+            <div>
+                <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
             </div>
-        `
+        </div>
+    `
 });
 
 Vue.component('add-card-form', {
@@ -78,9 +85,9 @@ Vue.component('add-card-form', {
                             <input id="name" v-model="name" placeholder="Enter card name">
                         </p>
                         <p>
-                <label for="deadline">Deadline:</label>
-                <input type="datetime-local" id="deadline" v-model="deadline">
-            </p>
+                            <label for="deadline">Deadline:</label>
+                            <input type="datetime-local" id="deadline" v-model="deadline">
+                        </p>
                         <div>
                             <h4>Add items (min 3):</h4>
                             <ul v-if="tempItems.length">
@@ -95,7 +102,7 @@ Vue.component('add-card-form', {
                             <p>Added: {{ tempItems.length }}/5</p>
                         </div>
                         <p>
-                            <input type="submit" value="Add card"  :disabled="formDisabled || tempItems.length < 3 || !name">
+                            <input type="submit" value="Add card" :disabled="formDisabled || tempItems.length < 3 || !name">
                         </p>
                     </div>
                 </div>
@@ -158,18 +165,18 @@ Vue.component('first-column', {
         }
     },
     template: `
-        <div>
-            <h2>First column (max {{ max }})</h2>
             <div>
-                <p v-if="!value.length">You haven't added any cards yet.</p>
-                <draggable v-model="columnCards" :disabled="locked" item-key="id" tag="div" class="column-item">
-                    <div v-for="card in columnCards" :key="card.id">
-                        <card-item :card="card" @toggle-item="$emit('toggle-item', $event)" :disabled="locked"></card-item>
-                    </div>
-                </draggable>
+                <h2>First column (max {{ max }})</h2>
+                <div>
+                    <p v-if="!value.length">You haven't added any cards yet.</p>
+                    <draggable v-model="columnCards" :disabled="locked" item-key="id" tag="div" class="column-item">
+                        <div v-for="card in columnCards" :key="card.id">
+                            <card-item :card="card" @toggle-item="$emit('toggle-item', $event)" :disabled="locked"></card-item>
+                        </div>
+                    </draggable>
+                </div>
             </div>
-        </div>
-    `
+        `
 });
 
 Vue.component('second-column', {
@@ -184,18 +191,18 @@ Vue.component('second-column', {
         }
     },
     template: `
-        <div>
-            <h2>Second column (max {{ max }})</h2>
             <div>
-                <p v-if="!value.length">You haven't added any cards yet.</p>
-                <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
-                    <div v-for="card in columnCards" :key="card.id">
-                        <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
-                    </div>
-                </draggable>
+                <h2>Second column (max {{ max }})</h2>
+                <div>
+                    <p v-if="!value.length">You haven't added any cards yet.</p>
+                    <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
+                        <div v-for="card in columnCards" :key="card.id">
+                            <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                        </div>
+                    </draggable>
+                </div>
             </div>
-        </div>
-    `
+        `
 });
 
 Vue.component('third-column', {
@@ -209,18 +216,18 @@ Vue.component('third-column', {
         }
     },
     template: `
-        <div>
-            <h2>Third Column</h2>
             <div>
-                <p v-if="!value.length">You haven't added any cards yet.</p>
-                <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
-                    <div v-for="card in columnCards" :key="card.id">
-                        <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
-                    </div>
-                </draggable>
+                <h2>Third Column</h2>
+                <div>
+                    <p v-if="!value.length">You haven't added any cards yet.</p>
+                    <draggable v-model="columnCards" item-key="id" tag="div" class="column-item">
+                        <div v-for="card in columnCards" :key="card.id">
+                            <card-item :card="card" @toggle-item="$emit('toggle-item', $event)"></card-item>
+                        </div>
+                    </draggable>
+                </div>
             </div>
-        </div>
-    `
+        `
 });
 
 
@@ -255,10 +262,12 @@ new Vue({
             let completed = 0;
             const allCards = [...this.firstColumnCards, ...this.secondColumnCards, ...this.thirdColumnCards];
             allCards.forEach(card => {
-                card.items.forEach(item => {
-                    total++;
-                    if (item.completed) completed++;
-                });
+                if (card.items && Array.isArray(card.items)) {
+                    card.items.forEach(item => {
+                        total++;
+                        if (item.completed) completed++;
+                    });
+                }
             });
             const percent = total === 0 ? 0 : Math.round((completed / total) * 100);
             return { completed, total, percent };
@@ -308,6 +317,7 @@ new Vue({
                 id: this.nextCardId++,
                 name: cardData.name,
                 items: items,
+                createdAt: new Date().toLocaleString(), // Добавляем дату создания
                 completedAt: null,
                 deadline: cardData.deadline || null,
             };
@@ -323,7 +333,7 @@ new Vue({
         },
 
         getCompletionPercent(card) {
-            if (!card.items.length) return 0;
+            if (!card.items || !Array.isArray(card.items) || card.items.length === 0) return 0;
             const completedCount = card.items.filter(item => item.completed).length;
             return (completedCount / card.items.length) * 100;
         },
@@ -405,6 +415,21 @@ new Vue({
                     this.secondColumnCards = data.secondColumnCards || [];
                     this.thirdColumnCards = data.thirdColumnCards || [];
                     this.nextCardId = data.nextCardId || 1;
+
+                    const allCards = [
+                        ...this.firstColumnCards,
+                        ...this.secondColumnCards,
+                        ...this.thirdColumnCards
+                    ];
+                    allCards.forEach(card => {
+                        if (!card.items || !Array.isArray(card.items)) {
+                            card.items = [];
+                        }
+
+                        if (!card.createdAt) {
+                            card.createdAt = null;
+                        }
+                    });
                 } catch (e) {
                     console.error('Ошибка загрузки', e);
                 }
@@ -425,4 +450,3 @@ new Vue({
         },
     }
 });
-
